@@ -1,0 +1,177 @@
+<head>
+    <title>LLama Build</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/hourglass.js"></script>
+    <link rel="icon" href="../Meta_AI_(official_logo).png">
+</head>
+<h1>LLama Build</h1>
+
+<h3>Bring your ideas into <span class="Word">APP</span></h3>
+<style>
+    *{
+   background-color: #090915;
+   border-color: #2E2E3A;
+    
+}
+
+
+
+
+
+
+
+
+body { 
+  font-family: Arial, sans-serif; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  color: white;
+}
+
+h1{
+    background: linear-gradient(to bottom, #696EFF, #F8ACFF);
+    -webkit-background-clip: text; /* Nécessaire pour les navigateurs WebKit comme Chrome et Safari */
+    color: transparent; /* Rend la couleur du texte transparente pour afficher le fond */
+}
+
+span{
+    background: linear-gradient(to right, #696EFF, #F8ACFF);
+    -webkit-background-clip: text; /* Nécessaire pour les navigateurs WebKit comme Chrome et Safari */
+    color: transparent; /* Rend la couleur du texte transparente pour afficher le fond */ 
+}
+
+.container { 
+  display: flex; 
+  width: 100%;  
+  margin-top: 20px; 
+}
+
+.input-bar { 
+  margin-bottom: 20px; 
+  width: 100%; 
+  text-align: center;
+}
+
+.input-bar input { 
+  width: 60%; 
+  padding: 8px;
+  font-size: 1rem; 
+  border-radius: 18px;
+  border-color: #1C1C30;
+  color: white;
+}
+
+
+.input-bar button { 
+  padding: 8px 12px; 
+  font-size: 1rem;
+  background-color:#696eff;
+  border: none;
+  margin-left: 5px; 
+  border-radius: 12px; 
+  transition: all ease 0.5s;
+}
+
+.input-bar button:hover { 
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.response-display, .sandbox { 
+  width: 50%; 
+  padding: 10px; 
+  border: 1px solid #ccc; 
+  color: white;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.response-display pre { 
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  background: inherit; 
+  padding: 10px; 
+  color: white;
+}
+
+#code-display{
+    color: white;
+    border: none;
+}
+
+.sandbox pre, .response-display pre { 
+  color: white !important; /* Texte en blanc */
+  background-color: #090915; /* Fond pour correspondre à ton thème */
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  padding: 10px;
+  border: 1px solid #2E2E3A; /* Bordure adaptée */
+}
+
+
+iframe { 
+  width: 100%;
+  height: 500px;
+  border: none;
+  color: white;
+  background-color: #fff;
+} 
+</style>
+
+<div class="input-bar">
+    <input type="text" id="prompt" placeholder="Describe the web app you want">
+    <button onclick="generateCode()">Generate</button>
+</div>
+<div class="container">
+    <div class="response-display">
+        <h3>Generated Code:</h3>
+        <pre id="code-display"><code class="language-html"></code></pre>
+    </div>
+    <div class="sandbox">
+        <h3>Sandbox Preview:</h3>
+        <iframe id="sandbox-frame"></iframe>
+    </div>
+</div>
+
+<script>
+    async function generateCode() {
+        const prompt = document.getElementById('prompt').value;
+        const codeDisplay = document.getElementById('code-display');
+        const sandboxFrame = document.getElementById('sandbox-frame');
+        let responseElement = document.getElementById("code-display");
+        responseElement.innerHTML = `
+<l-hourglass
+  size="40"
+  bg-opacity="0.1"
+  speed="1.75"
+  color="purple" 
+></l-hourglass>`; 
+
+        try {
+            const response = await fetch('/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: prompt })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                codeDisplay.innerHTML = `<code class="language-html">${Prism.highlight(data.code, Prism.languages.html, 'html')}</code>`;
+
+                // Create a Blob and URL for the generated code
+                const blob = new Blob([data.code], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+
+                // Display in the sandbox iframe
+                sandboxFrame.src = url; 
+            } else {
+                codeDisplay.textContent = 'Error: ' + response.status;
+            }
+        } catch (error) {
+            codeDisplay.textContent = 'Error: ' + error.message;
+        }
+    }
+</script>
